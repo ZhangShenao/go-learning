@@ -1,8 +1,17 @@
-package main
+//包是Go语言的基本组成单元,通常使用单个的小写单词命名
+//一个Go程序本质上就是一组包的集合
+//所有Go代码都有自己隶属的包
+//main包在Go中是一个特殊的包，整个Go程序中仅允许存在一个名为main的包
+package main //定义包package
 
+//导入包路径
+//导入标准库fmt目录下的包
+//注意:这里导入的是包路径,而不是包名。通常导入路径的最后一个分段名与包名是相同的
+//main包不可用被导入
 import "fmt"
-import "rsc.io/quote"
 
 func main() {
-	fmt.Println(quote.Go())
+	//Go源码文件本身采用的是Unicode字符集,而且用的是UTF-8标准的字符编码方式,这与编译后的程序所运行的环境所使用的字符集和字符编码方式是一致的
+	//打印的结果就是所见即所得
+	fmt.Println("hello world~")
 }
