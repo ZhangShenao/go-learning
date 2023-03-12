@@ -9,10 +9,11 @@ import (
 
 //declare constants
 const (
-	HealthCheckPath     = "/healthz"
 	HealthCheckResponse = "OK"
 	VersionKey          = "version"
 )
+
+var version string
 
 //编写一个 HTTP 服务器，大家视个人不同情况决定完成到哪个环节，但尽量把 1 都做完：
 //接收客户端 request，并将 request 中带的 header 写入 response header
@@ -21,34 +22,38 @@ const (
 //当访问 localhost/healthz 时，应返回 200
 func main() {
 	//Parse Flags
-	version := flag.String(VersionKey, "v1.0", "specify the version of http server")
+	version = *flag.String(VersionKey, "v1.0", "specify the version of http server")
 	flag.Parse()
 
-	//Register Http Handler
-	http.HandleFunc("/", func(writer http.ResponseWriter, req *http.Request) {
-		//handle http headers
-		for k, v := range req.Header {
-			writer.Header().Add(k, v[0])
-		}
+	//Register Health Check Handler
+	http.HandleFunc("/healthz", healthCheckHandler)
 
-		writer.Header().Add(VersionKey, *version)
-
-		//get remote address
-		addr := req.RemoteAddr
-		log.Println("request ip: ", addr)
-
-		//write http response
-		uri := req.RequestURI
-		if HealthCheckPath == uri { //health check path
-			io.WriteString(writer, HealthCheckResponse)
-		}
-	})
+	//Register Http Request Handler
+	http.HandleFunc("/", requestHandler)
 
 	//Start HttpServer And Listen On Port
-	log.Printf("http server started on port: %d, version: %s\n", 80, *version)
+	log.Printf("http server started on port: %d, version: %s\n", 80, version)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		panic(err)
 	}
+}
 
+//Health Check Handler
+func healthCheckHandler(writer http.ResponseWriter, req *http.Request) {
+	io.WriteString(writer, HealthCheckResponse)
+}
+
+//Http Request Handler
+func requestHandler(writer http.ResponseWriter, req *http.Request) {
+	//handle http headers
+	for k, v := range req.Header {
+		writer.Header().Add(k, v[0])
+	}
+
+	writer.Header().Add(VersionKey, version)
+
+	//get remote address
+	addr := req.RemoteAddr
+	log.Println("request ip: ", addr)
 }
